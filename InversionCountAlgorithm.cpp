@@ -128,7 +128,7 @@ namespace sree {
 
 int main() {
     using namespace std;
-    sree::InversionCount ic("/Users/Sreejith_S03/Desktop/sreejith/workspace/xcode4.6/testBoostLib1/testBoostLib1/inp1.txt");
+    sree::InversionCount ic;
     cout << "Inversion Pairs = "; 
     int inv_count = ic.getTotalNumOfInvCounts();
     cout << endl;
