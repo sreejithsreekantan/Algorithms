@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+import heapq
+
 class WeightedDirectedGraph(object):
     """
     DirectedGraph
@@ -46,31 +48,77 @@ class DijkstrasAlgorithm(object):
     """
     def __init__(self, WeightedDirectedGraph, source):
         super(DijkstrasAlgorithm, self).__init__()
-        self.directedweightedgraph = WeightedDirectedGraph
+        self.graph = WeightedDirectedGraph
         self.source = source
         self.heap = []
-        self.run()
+        self.weighttonode = {}
+        self.parent = {}
+        self._run()
+        print self.parent
+        print self.weighttonode
 
-    def run(self):
-        for weightededge in graph.neighboursOf(source):
-            heapq.heappush(self.heap, (weightededge[1], weightededge[0]))
-        self.dijkstraalgo()
 
-    def dijkstraalgo(self):
+    def _run(self):
+        heapq.heappush(self.heap, (0, self.source))
+        self.weighttonode[self.source] = 0
+        self.parent[self.source] = self.source
         while self.heap:
-            weightededge = heapq.heappop(self.heap)
-            currentweight = weightededge[0]
-            currentnode = weightededge[1]
-            self.relaxneighboursof(currentnode, currentweight)
-            pass
-    def relaxneighboursof(node, weighttillnode):
-        for weightededge in graph.neighboursOf(source):
+            nearestweightandnode = heapq.heappop(self.heap)
+            nearestnode = nearestweightandnode[1]
+            self._relaxneighboursof(nearestnode)
+            
+    def _relaxneighboursof(self, nearestnode):
+
+        nearestweight = self.weighttonode[nearestnode]
+        for neighbournodeandweight  in self.graph.neighboursOf(nearestnode):
+            neighbour = neighbournodeandweight[0]
+            weight = neighbournodeandweight[1]
+            weighttoneighbour = nearestweight + weight
+            prevweighttoneighbour = self.weighttonode.get(neighbour, -1)
+            
+            if prevweighttoneighbour != -1 and weighttoneighbour < prevweighttoneighbour:
+                index = self._indexinheap(neighbour)
+                self.heap[index] = self.heap[-1]
+                self.heap.pop()
+                # heapq._siftup(self.heap, index)
+                heapq.heapify(self.heap)
+                  
+            if prevweighttoneighbour == -1 or weighttoneighbour < prevweighttoneighbour:
+                heapq.heappush(self.heap, (weighttoneighbour, neighbour))   
+                self.weighttonode[neighbour] = weighttoneighbour
+                self.parent[neighbour] = nearestnode 
+    
+    def _indexinheap(self, node):
+        index = -1
+        for weightandnode in self.heap:
+            index += 1
+            if weightandnode[1] == node:
+                print len(self.heap),weightandnode, index 
+                return index    
+        assert(index!=-1)        
+        return index                
+
+    def weightto(self, node):
+        return self.weighttonode[node]   
+    
+    def pathto(self, node):
+        path = []
+        self._pathto(node, path)
+        return path
+
+    def _pathto(self, node, path):
+        if self.parent[node]==node:
+            path.append(node)
+            return
+        self.pathto(self.parent[node], path)
+        path.append(node)
         
 
 
-g = WeightedDirectedGraph("inp1.txt")
-# g = WeightedDirectedGraph("dijkstraData.txt")
 
+# g = WeightedDirectedGraph("dijinp1.txt")
+g = WeightedDirectedGraph("dijkstraData.txt")
+# g.display()
 
-g.display()
-
+d = DijkstrasAlgorithm(g, 1)
+print "Weight to travel from node 1 to node 27 is ", d.weightto(27)
